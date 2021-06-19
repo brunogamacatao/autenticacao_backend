@@ -7,7 +7,19 @@ router.get('/', async (req, res) => {
   res.json(await Usuario.find());
 });
 
-router.get('/:id', findPorId, async (req, res) => {
+router.get('/bloqueia/:id', Seguranca.isAutenticado, Seguranca.hasRole('administrador'), findPorId, async (req, res) => {
+  req.usuario.bloqueado = true;
+  await req.usuario.save();
+  res.json({mensagem: 'Usuário bloqueado com sucesso'});
+});
+
+router.get('/desbloqueia/:id', Seguranca.isAutenticado, Seguranca.hasRole('administrador'), findPorId, async (req, res) => {
+  req.usuario.bloqueado = false;
+  await req.usuario.save();
+  res.json({mensagem: 'Usuário desbloqueado com sucesso'});
+});
+
+router.get('/:id', Seguranca.isAutenticado, findPorId, async (req, res) => {
   res.json(req.usuario);
 });
 
@@ -23,11 +35,11 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.delete('/:id', findPorId, async (req, res) => {
+router.delete('/:id', Seguranca.isAutenticado, findPorId, async (req, res) => {
   await req.usuario.remove();
 });
 
-router.put('/:id', findPorId, async (req, res) => {
+router.put('/:id', Seguranca.isAutenticado, findPorId, async (req, res) => {
   await req.usuario.set(req.body).save();
 });
 

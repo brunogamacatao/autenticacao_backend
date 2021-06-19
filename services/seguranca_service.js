@@ -62,6 +62,19 @@ const isAutenticado = (req, res, next) => {
   });
 };
 
+const hasRole = (role) => {
+  return (req, res, next) => {
+    if (req.usuario.role === role) {
+      next();
+    } else {
+      return res.status(401).send({ 
+        auth: false, 
+        message: 'Você não tem autorização para acessar esse recurso'
+      });
+    }
+  };
+};
+
 const podeAcessar = (roles) => {
   return (req, res, next) => {
     let pode = false;
@@ -84,18 +97,24 @@ const validaLogin = async (usuario, senha) => {
   if (!usuario) {
     throw 'Não foi encontrado um usuário com o email informado!';
   } else if (await compara(senha, usuario.senha)) {
+    // verifica se o usuário está bloqueado
+    if (usuario.bloqueado) {
+      throw 'O usuário está bloqueado. Procure o administrador do sistema';
+    }
+
     // login válido
+    return true;
   } else {
     throw 'Senha inválida!';
   }
 };
-
 
 module.exports = {
   encripta,
   compara,
   criaToken,
   isAutenticado,
+  hasRole,
   validaLogin,
   podeAcessar
 };
