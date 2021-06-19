@@ -5,6 +5,7 @@ const express = require('express');
 const cors = require('cors');
 const {loggerRequisicoes, logger} = require('./logging');
 const db = require('./db');
+const bootstrap = require('./bootstrap');
 
 // criando a aplicação
 const app = express();
@@ -27,6 +28,8 @@ app.use('/filmes', require('./controllers/filme_controller'));
 
 // 1. Conecta ao banco de dados
 db.conecta(() => {
+  bootstrap.boot();
+
   const SERVER_PORT = parseInt(process.env.SERVER_PORT);
   // 2. Inicia o servidor web
   app.listen(SERVER_PORT, () => {
